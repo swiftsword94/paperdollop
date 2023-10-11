@@ -1,0 +1,29 @@
+image type: png
+resolution:
+  12 images
+  4x4
+  paperdoll weapons resolution: 128px x 192px
+  output: 128px x 192px
+starting handle:
+
+weapons:
+start off diagonal pointing right
+first one is down facing - pointing up
+  no masking
+  rotate counterclockwise (positive) 45 degrees
+  movement in x,y : 0,0 0,1 0,0 0,-2
+second row left facing - pointing left
+  no masking
+  mirror across x
+  movement in x,y : 0,0 -3,-1 0,0 2,0
+third row right facing - 
+  no masking
+  regular image
+  movement in x,y : 0,0 0,1 0,0 0,-2
+fourth row top facing - pointing up
+  need masking
+  rotate counterclockwise (positive) 45 degrees
+  movement in x,y : 0,0 0,1 0,0 0,-2
+
+for mirroring use: 
+https://www.varsitytutors.com/hotmath/hotmath_help/topics/transformation-of-graphs-using-matrices-reflection#:~:text=A%20reflection%20is%20a%20transformation,symmetry%20using%20a%20reflection%20matrix.

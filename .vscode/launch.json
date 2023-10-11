@@ -1,0 +1,75 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'paperdollop'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=paperdollop",
+          "--package=paperdollop",
+        ],
+        "filter": {
+          "name": "paperdollop",
+          "kind": "bin"
+        }
+      },
+      "args": [
+        "--character-file=./assets/Npc_Generic_001.png",
+        "--item-file=./assets/Spear_01.png",
+        "--output-directory=./assets/new.png",
+        "--settings=./assets/settings.json"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release executable 'paperdollop'",
+      "cargo": {
+        "args": [
+          "build",
+          "--release",
+          "--bin=paperdollop",
+          "--package=paperdollop",
+        ],
+        "filter": {
+          "name": "paperdollop",
+          "kind": "bin"
+        }
+      },
+      "args": [
+        "--character-file=./assets/Npc_Generic_001.png",
+        "--item-file=./assets/Spear_01.png",
+        "--output-directory=./assets/new.png",
+        "--settings=./assets/settings.json"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'paperdollop'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=paperdollop",
+          "--package=paperdollop"
+        ],
+        "filter": {
+          "name": "paperdollop",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
