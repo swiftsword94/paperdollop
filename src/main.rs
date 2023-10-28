@@ -2,7 +2,7 @@ mod cli;
 mod image_editing;
 
 use serde::Deserialize;
-use std::{error::Error, io::{BufWriter, BufReader}, fs::File};
+use std::{error::Error, io::{BufWriter, BufReader}, fs::{File, read_dir}, path::Path};
 use crate::cli::parse_command_line;
 use image::{io::Reader as ImageReader, Rgba, ImageOutputFormat};
 use image_editing::generate_paperdoll;
@@ -11,7 +11,8 @@ use image_editing::generate_paperdoll;
 pub struct TranslationRow {
     angle: f32,
     scaling_factor: f32,
-    mirror: bool,
+    mirror_x: bool,
+    mirror_y: bool,
     row: Vec<(i32, i32)>,
 }
 
@@ -23,32 +24,41 @@ pub struct TranslationMatrix {
 fn main() -> Result<(), Box<dyn Error>> {
     let args = parse_command_line()?;
 
-    let character_file_string = args.character_file.unwrap();
+    let character_file_string = args.character_file;
     let dynamic_character_image = image::open(character_file_string.to_str().unwrap())?;
     let character_image = dynamic_character_image.as_rgba8().unwrap();
-    let output_destination = args.output_directory.unwrap();
-    let settings_file_path = args.settings.unwrap();
+    let output_destination = args.output_directory;
+    let settings_file_path = args.settings;
 
     
     let settings: TranslationMatrix  = serde_json::from_reader(BufReader::new(File::open(settings_file_path)?))?;
     
     let default = &Rgba([0, 0, 0, 0]);
-    // let translation_matrix = [
-    //     vec![(-6,0), (-6,1), (-6,0), (-6,-2)],
-    //     vec![(0,0), (-3,-1), (0,0), (2,0)],
-    //     vec![(0,0), (0,1), (0,0), (0,-2)],
-    //     vec![(0,0), (0,1), (0,0), (0,-2)]
-    // ];
 
-    if let Some(path) = args.item_file {
-        let dynamic_item_image = ImageReader::open(path)?.decode()?;
-        let item_image = dynamic_item_image.as_rgba8().unwrap();
-        let paperdoll = generate_paperdoll(character_image, item_image, &settings, default);
-        let writer: &mut BufWriter<File> = &mut BufWriter::new(File::create(output_destination.clone())?);
-        let _ = paperdoll.write_to(writer, ImageOutputFormat::Png);
+    if let Some(item_path) = args.item_file {
+        generate_and_save_paperdoll(&item_path, character_image, &settings, default, &output_destination)
+    } else {
+        let dir = args.item_directory.unwrap();
+        read_dir(dir)?
+            .try_for_each(|dir_entry_result| {
+                let entry = dir_entry_result?;
+                let item_path = entry.path();
+                generate_and_save_paperdoll(&item_path, character_image, &settings, default, &output_destination)
+            })
     }
-    
-    Ok(())
+}
+
+fn generate_and_save_paperdoll(item_path: &Path, character_image: &image::ImageBuffer<Rgba<u8>, Vec<u8>>, settings: &TranslationMatrix, default: &Rgba<u8>, output_destination: &Path) -> Result<(), Box<dyn Error>> {
+    let dynamic_item_image = ImageReader::open(item_path)?.decode()?;
+    let item_image = dynamic_item_image.as_rgba8().unwrap();
+    let paperdoll = generate_paperdoll(character_image, item_image, settings, default)?;
+    let item_name = item_path.file_name().unwrap();
+    let ouput_file = output_destination.join(item_name);
+    let writer: &mut BufWriter<File> = &mut BufWriter::new(File::create(ouput_file)?);
+    match paperdoll.write_to(writer, ImageOutputFormat::Png) {
+        Ok(_) => Ok(()),
+        Err(err) => todo!(),
+    }
 }
 
 

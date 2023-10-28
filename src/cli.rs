@@ -9,7 +9,7 @@ use clap::{Parser, command};
 pub struct Cli {
     /// Sets a custom config file
     #[arg(required = true, short, long, value_name = "FILE")]
-    pub character_file: Option<PathBuf>,
+    pub character_file: PathBuf,
     
     #[arg(short = 'i', long, value_name = "FILE")]
     pub item_file: Option<PathBuf>,
@@ -18,10 +18,10 @@ pub struct Cli {
     pub item_directory: Option<PathBuf>,
     
     #[arg(required = true, short, long, value_name = "DIRECTORY", )]
-    pub output_directory: Option<PathBuf>,
+    pub output_directory: PathBuf,
     
     #[arg(required = true, short, long, value_name = "FILE", )]
-    pub settings: Option<PathBuf>,
+    pub settings: PathBuf,
 
     /// Turn debugging information on
     #[arg(short, long, action = clap::ArgAction::Count)]
