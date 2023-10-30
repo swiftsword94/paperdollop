@@ -22,9 +22,10 @@
       },
       "args": [
         "--character-file=./assets/Npc_Generic_001.png",
-        "--item-file=./assets/Spear_01.png",
-        "--output-directory=./assets/new.png",
-        "--settings=./assets/settings.json"
+        // "--item-file=./assets/Spear_01.png",
+        "--item-directory=C:/source/paperdollop/assets/Premium_Armory/Singles/Weapon_Singles/Copper",
+        "--output-directory=./assets/new",
+        "--settings=./settings.json"
       ],
       "cwd": "${workspaceFolder}"
     },
@@ -46,9 +47,10 @@
       },
       "args": [
         "--character-file=./assets/Npc_Generic_001.png",
-        "--item-file=./assets/Spear_01.png",
-        "--output-directory=./assets/new.png",
-        "--settings=./assets/settings.json"
+        // "--item-file=./assets/Spear_01.png",
+        "--item-directory=C:/source/paperdollop/assets/Premium_Armory/Singles/Weapon_Singles/Copper",
+        "--output-directory=./assets/new",
+        "--settings=./settings.json"
       ],
       "cwd": "${workspaceFolder}"
     },

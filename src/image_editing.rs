@@ -1,7 +1,7 @@
 use std::cmp;
 
-use image::{Pixel, ImageBuffer, GenericImage, imageops::{flip_horizontal, resize, FilterType::Lanczos3, flip_vertical}, ImageError};
-use imageproc::{geometric_transformations::{rotate_about_center, Interpolation, translate}, definitions::{Image, Clamp}};
+use image::{Pixel, ImageBuffer, GenericImage, imageops::{flip_horizontal, resize, FilterType::Lanczos3, flip_vertical}, ImageError, error::{ParameterError, ParameterErrorKind}, ImageResult, Rgba};
+use imageproc::{geometric_transformations::{rotate_about_center, Interpolation, translate}, definitions::{Image, Clamp}, drawing::Canvas};
 use conv::ValueInto;
 
 use crate::{TranslationMatrix, TranslationRow};
@@ -14,7 +14,7 @@ pub enum Orientation {
 pub fn append_images<'a, P, I>(iter: I, width_of_single_image: u32, height_of_single_image: u32, orientation: Orientation) -> Image<P>
 where
   P: Pixel + Send + Sync + 'a,
-  <P as Pixel>::Subpixel: Send + Sync + ValueInto<f32> + Clamp<f32>,
+  <P as Pixel>::Subpixel: Send + Sync,
   I: ExactSizeIterator<Item = &'a Image<P>>,
 {
   let length = iter.len();
@@ -23,26 +23,71 @@ where
     Orientation::Vertical => (width_of_single_image, height_of_single_image * length as u32),
 };
 
-  let horizontal_append = |mut acc: ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, image: (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>)|{
-    acc.copy_from(image.1, width_of_single_image * image.0 as u32, 0).unwrap();
-    acc
-  };
+  let horizontal_append = fun_name(width_of_single_image);
 
-  let vertical_append = |mut acc: ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, image: (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>)|{
-    let x = acc.copy_from(image.1, 0, height_of_single_image * image.0 as u32);
-    x.unwrap();
-    acc
-  };
   let buf = iter
     .into_iter()
     .enumerate();
   match orientation {
     Orientation::Horizontal => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), horizontal_append),
-    Orientation::Vertical => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), vertical_append),
+    Orientation::Vertical => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), vertical_append(height_of_single_image)),
 }
 }
 
-pub fn make_base_item_image<P>(item_image: &Image<P>, settings: &TranslationRow, default: &P) -> Result<Image<P>, ImageError>
+fn fun_name<P>(width_of_single_image: u32)
+-> impl Fn(ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>))
+-> ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>
+where P: Pixel + Send + Sync {
+  move |mut acc: ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, image: (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>)|{
+    acc.copy_from(image.1, width_of_single_image * image.0 as u32, 0).unwrap();
+    acc
+  }
+}
+
+fn vertical_append<P>(height_of_single_image: u32)
+-> impl Fn(ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>)) 
+-> ImageBuffer<P, Vec<<P as Pixel>::Subpixel>> 
+where P: Pixel + Send + Sync {
+  move |mut acc, image| {
+    acc.copy_from(image.1, 0, height_of_single_image * image.0 as u32).unwrap();
+    acc
+  }
+}
+
+pub fn mask_image<P>(base_image: &Image<P>, masking_image: &Image<P>) -> ImageResult<Image<P>>
+where
+  P: Pixel + Send + Sync,
+  <P as Pixel>::Subpixel: Send + Sync + Ord,
+{
+  let height = base_image.height();
+  let width = base_image.width();
+  if height != masking_image.height() && width != masking_image.width() {
+    Err(ImageError::Parameter(ParameterError::from_kind(ParameterErrorKind::DimensionMismatch)))
+  } else {
+    let mask_pixel = |mut acc: Vec<<P as Pixel>::Subpixel> , pixel_pair: (&P, &P)| {
+      let base_channels = pixel_pair.0.channels();
+      let masking_alpha = pixel_pair.1.channels()[3];
+
+      let res_channels = &[
+        base_channels[0],
+        base_channels[1],
+        base_channels[2],
+        base_channels[3] - masking_alpha.min(base_channels[3]),
+      ];
+
+      acc.extend_from_slice(res_channels);
+      acc
+    };
+    let pixel_array: Vec<P::Subpixel> = base_image.pixels()
+    .zip(masking_image.pixels())
+    .fold(vec![], mask_pixel);
+
+    let res = ImageBuffer::from_vec(width, height, pixel_array).unwrap();
+    Ok(res)
+  }
+}
+
+pub fn make_base_item_image<P>(item_image: &Image<P>, settings: &TranslationRow, default: &P) -> ImageResult<Image<P>>
 where
   P: Pixel + Send + Sync + 'static,
   <P as Pixel>::Subpixel: Send + Sync + ValueInto<f32> + Clamp<f32>,
@@ -96,10 +141,10 @@ where
   Ok(res)
 }
 
-pub fn generate_paperdoll<P>(character_image: &Image<P>, item_image: &Image<P>, translation_matrix: &TranslationMatrix, default: &P) -> Result<Image<P>, ImageError>
+pub fn generate_paperdoll<P>(character_image: &Image<P>, item_image: &Image<P>, translation_matrix: &TranslationMatrix, default: &P) -> ImageResult<Image<P>>
 where
   P: Pixel + Send + Sync + 'static,
-  <P as Pixel>::Subpixel: Send + Sync + ValueInto<f32> + Clamp<f32>,
+  <P as Pixel>::Subpixel: Send + Sync + ValueInto<f32> + Clamp<f32> + Ord,
 {
   let buffer_width = 32;
   let buffer_height = 48;
@@ -116,14 +161,17 @@ where
     translate_row_images(&matrix[0].row, make_base_item_image(&expanded_item_image, &matrix[0], default)?),
     translate_row_images(&matrix[1].row, make_base_item_image(&expanded_item_image, &matrix[1], default)?),
     translate_row_images(&matrix[2].row, make_base_item_image(&expanded_item_image, &matrix[2], default)?),
-    translate_row_images(&matrix[3].row, make_base_item_image(&ImageBuffer::new(buffer_width, buffer_height), &matrix[3], default)?)];
+    translate_row_images(&matrix[3].row, make_base_item_image(&expanded_item_image, &matrix[3], default)?)];
 
   let res: Vec<ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>> = rows.iter().map(|row| {
     let row_iter = row.iter();
     append_images(row_iter, expanded_item_image.width(), expanded_item_image.height(), Orientation::Horizontal)
   }).collect();
 
-  Ok(append_images(res.iter(), buffer_width * translation_matrix.matrix[0].row.len() as u32, buffer_height, Orientation::Vertical))
+  let umasked_paperdoll = append_images(res.iter(), buffer_width * translation_matrix.matrix[0].row.len() as u32, buffer_height, Orientation::Vertical);
+
+  let masked_paperdoll = mask_image(&umasked_paperdoll, character_image)?;
+  Ok(masked_paperdoll)
 
 
   // for miror use projection with mirror matrix transform
