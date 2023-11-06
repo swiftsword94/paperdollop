@@ -1,7 +1,7 @@
 use std::cmp;
 
-use image::{Pixel, ImageBuffer, GenericImage, imageops::{flip_horizontal, resize, FilterType::Lanczos3, flip_vertical}, ImageError, error::{ParameterError, ParameterErrorKind}, ImageResult, Rgba};
-use imageproc::{geometric_transformations::{rotate_about_center, Interpolation, translate}, definitions::{Image, Clamp}, drawing::Canvas};
+use image::{Pixel, ImageBuffer, GenericImage, imageops::{flip_horizontal, resize, FilterType::Lanczos3, flip_vertical}, ImageError, error::{ParameterError, ParameterErrorKind}, ImageResult};
+use imageproc::{geometric_transformations::{rotate_about_center, Interpolation, translate}, definitions::{Image, Clamp}};
 use conv::ValueInto;
 
 use crate::{TranslationMatrix, TranslationRow};

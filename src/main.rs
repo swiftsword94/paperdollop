@@ -16,6 +16,8 @@ pub struct TranslationRow {
     row: Vec<(i32, i32)>,
 }
 
+
+
 #[derive(Deserialize)]
 pub struct TranslationMatrix {
     matrix: [TranslationRow; 4]
@@ -57,7 +59,7 @@ fn generate_and_save_paperdoll(item_path: &Path, character_image: &image::ImageB
     let writer: &mut BufWriter<File> = &mut BufWriter::new(File::create(ouput_file)?);
     match paperdoll.write_to(writer, ImageOutputFormat::Png) {
         Ok(_) => Ok(()),
-        Err(err) => todo!(),
+        Err(err) => Err(Box::new(err)),
     }
 }
 
