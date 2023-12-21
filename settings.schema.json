@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Settings",
+    "definitions": {
+        "Settings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "matrix": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Matrix"
+                    }
+                }
+            },
+            "required": [
+                "matrix"
+            ],
+            "title": "Settings"
+        },
+        "Matrix": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "angle": {
+                    "type": "number"
+                },
+                "mirror_x": {
+                    "type": "boolean"
+                },
+                "mirror_y": {
+                    "type": "boolean"
+                },
+                "scaling_factor": {
+                    "type": "number"
+                },
+                "row": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "angle",
+                "mirror_x",
+                "mirror_y",
+                "row",
+                "scaling_factor"
+            ],
+            "title": "Matrix"
+        }
+    }
+}

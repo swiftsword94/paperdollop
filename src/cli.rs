@@ -7,25 +7,25 @@ use clap::{Parser, command};
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-    /// Sets a custom config file
+    /// The character file used for masking
     #[arg(required = true, short, long, value_name = "FILE")]
     pub character_file: PathBuf,
     
+    /// a single item, weapon, shield etc...
     #[arg(short = 'i', long, value_name = "FILE")]
     pub item_file: Option<PathBuf>,
     
+    /// a directory of items to create paperdolls from
     #[arg(short = 'I', long, value_name = "DIRECTORY")]
     pub item_directory: Option<PathBuf>,
     
-    #[arg(required = true, short, long, value_name = "DIRECTORY", )]
+    /// the directory to ouptut the paperdolls
+    #[arg(required = true, short, long, value_name = "DIRECTORY")]
     pub output_directory: PathBuf,
     
-    #[arg(required = true, short, long, value_name = "FILE", )]
+    /// the path of the settings file to use for paperdoll configuration. 
+    #[arg(required = true, short, long, value_name = "FILE")]
     pub settings: PathBuf,
-
-    /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    pub debug: u8,
 }
 
 pub fn parse_command_line() -> Result<Cli, String> {
