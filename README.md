@@ -16,9 +16,9 @@ Instructions:
   The maximum offset size is the maximum number in the "row" property.
   32 is really just the input image size which is assumed to be a 32x32 image.
 - provide the paths for:
-  - character_file
-  - output_directory
-  - settings
+  - character_file - the character used to mask the images after translation/rotation/mirroring/scaling
+  - output_directory - the directory to output to. Must exist prior to creation.
+  - settings - settings file as described below
   - Either one of the two:
     - item_file - for single item paperdolls
     - item_directory - for creating paperdolls for multiple input item inputs in the same directory
