@@ -23,18 +23,16 @@ where
     Orientation::Vertical => (width_of_single_image, height_of_single_image * length as u32),
 };
 
-  let horizontal_append = fun_name(width_of_single_image);
-
   let buf = iter
     .into_iter()
     .enumerate();
   match orientation {
-    Orientation::Horizontal => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), horizontal_append),
+    Orientation::Horizontal => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), horizontal_append(width_of_single_image)),
     Orientation::Vertical => buf.fold(ImageBuffer::new(size_of_items.0, size_of_items.1), vertical_append(height_of_single_image)),
 }
 }
 
-fn fun_name<P>(width_of_single_image: u32)
+fn horizontal_append<P>(width_of_single_image: u32)
 -> impl Fn(ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>, (usize, &ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>))
 -> ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>
 where P: Pixel + Send + Sync {
