@@ -34,7 +34,7 @@
                 "scaling_factor": {
                     "type": "number"
                 },
-                "row": {
+                "frames": {
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -48,7 +48,7 @@
                 "angle",
                 "mirror_x",
                 "mirror_y",
-                "row",
+                "frames",
                 "scaling_factor"
             ],
             "title": "Matrix"

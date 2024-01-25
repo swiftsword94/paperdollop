@@ -156,17 +156,17 @@ where
   expanded_item_image.copy_from(item_image, expanded_starting_x, expanded_starting_y).unwrap();
 
   let rows = vec![
-    translate_row_images(&matrix[0].row, make_base_item_image(&expanded_item_image, &matrix[0], default)?),
-    translate_row_images(&matrix[1].row, make_base_item_image(&expanded_item_image, &matrix[1], default)?),
-    translate_row_images(&matrix[2].row, make_base_item_image(&expanded_item_image, &matrix[2], default)?),
-    translate_row_images(&matrix[3].row, make_base_item_image(&expanded_item_image, &matrix[3], default)?)];
+    translate_row_images(&matrix[0].frames, make_base_item_image(&expanded_item_image, &matrix[0], default)?),
+    translate_row_images(&matrix[1].frames, make_base_item_image(&expanded_item_image, &matrix[1], default)?),
+    translate_row_images(&matrix[2].frames, make_base_item_image(&expanded_item_image, &matrix[2], default)?),
+    translate_row_images(&matrix[3].frames, make_base_item_image(&expanded_item_image, &matrix[3], default)?)];
 
   let res: Vec<ImageBuffer<P, Vec<<P as Pixel>::Subpixel>>> = rows.iter().map(|row| {
     let row_iter = row.iter();
     append_images(row_iter, expanded_item_image.width(), expanded_item_image.height(), Orientation::Horizontal)
   }).collect();
 
-  let umasked_paperdoll = append_images(res.iter(), buffer_width * translation_matrix.matrix[0].row.len() as u32, buffer_height, Orientation::Vertical);
+  let umasked_paperdoll = append_images(res.iter(), buffer_width * translation_matrix.matrix[0].frames.len() as u32, buffer_height, Orientation::Vertical);
 
   let masked_paperdoll = mask_image(&umasked_paperdoll, character_image)?;
   Ok(masked_paperdoll)
@@ -183,7 +183,7 @@ fn get_max_of_all_translations(translation_matrix: &TranslationMatrix) -> i32
     .fold(0, |acc, val|
       cmp::max(
       val
-      .row
+      .frames
       .iter()
       .fold(0, |max_in_row, row|
         cmp::max(max_in_row, row.0.abs())),acc))

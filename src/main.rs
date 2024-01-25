@@ -18,7 +18,7 @@ pub struct TranslationRow {
     // Boolean for mirroring against y axis.
     mirror_y: bool,
     // An array of Arrays indicating translation in the (X axis, Y axis).
-    row: Vec<(i32, i32)>,
+    frames: Vec<(i32, i32)>,
 }
 
 
