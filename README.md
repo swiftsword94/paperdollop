@@ -13,7 +13,7 @@ Instructions:
 - open in command line,
 - update the settings file 
 - Try calculating the scaling factor based on 1-(2 * (abs(maximum offset size) / 32)) for best results.
-  The maximum offset size is the maximum number in the "row" property.
+  The maximum offset size is the maximum number in the "frames" property among all frames in the settings file.
   32 is really just the input image size which is assumed to be a 32x32 image.
 - provide the paths for:
   - character_file - the character used to mask the images after translation/rotation/mirroring/scaling
