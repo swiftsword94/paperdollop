@@ -10,15 +10,15 @@ use image_editing::generate_paperdoll;
 #[derive(Deserialize)]
 pub struct TranslationRow {
     // How much to rotate counterclockwise. Any rotation incurs smoothing in the ouput image.
-    angle: f32,
+    pub angle: f32,
     // Value between 0 and 1 to normally used to help with offseting by an ammount that would cause the image to go out of bounds.
-    scaling_factor: f32,
+    pub scaling_factor: f32,
     // Boolean for mirroring against x axis.
-    mirror_x: bool,
+    pub mirror_x: bool,
     // Boolean for mirroring against y axis.
-    mirror_y: bool,
+    pub mirror_y: bool,
     // An array of Arrays indicating translation in the (X axis, Y axis).
-    frames: Vec<(i32, i32)>,
+    pub frames: Vec<(i32, i32)>,
 }
 
 
